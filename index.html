@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>店家社群評價彙整搜尋器</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.375rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .results {
+      margin-top: 2rem;
+      display: none;
+    }
+
+    .results.active {
+      display: block;
+    }
+
+    .results-header {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .card p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .btn-link {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      padding: 0.5rem;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .btn-link:hover {
+      background: #f1f5f9;
+    }
+
+    .note {
+      margin-top: 1.5rem;
+      padding: 0.75rem;
+      background: #fffbe2;
+      border-left: 4px solid #f59e0b;
+      font-size: 0.8rem;
+      color: #78350f;
+      border-radius: 0 4px 4px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>店家評價一鍵搜尋器</h1>
+  <p class="subtitle">輸入店家與區域，快速跳轉跨平台（Google、Dcard、Threads、PTT）討論</p>
+
+  <div class="form-group">
+    <label for="district">所在行政區 / 縣市</label>
+    <input type="text" id="district" placeholder="例如：西屯區、板橋區、台中">
+  </div>
+
+  <div class="form-group">
+    <label for="storeName">店家名稱</label>
+    <input type="text" id="storeName" placeholder="例如：五十嵐、麻古茶坊、某某拉麵">
+  </div>
+
+  <button onclick="searchStore()">開始精準搜尋</button>
+
+  <div class="results" id="resultsBlock">
+    <div class="results-header" id="targetTitle">搜尋目標</div>
+    
+    <div class="grid">
+      <div class="card">
+        <h3>📍 Google 地圖</h3>
+        <p>查看評分、店家地址、交通位置與即時營業時間。</p>
+        <a id="linkGoogle" class="btn-link" target="_blank">開啟 Google Map</a>
+      </div>
+
+      <div class="card">
+        <h3>💬 Threads 評價</h3>
+        <p>搜尋最新即時短評、避雷心得與交通方便度討論。</p>
+        <a id="linkThreads" class="btn-link" target="_blank">搜尋 Threads</a>
+      </div>
+
+      <div class="card">
+        <h3>🎓 Dcard 評價</h3>
+        <p>查看學生/年輕族群的真心話、必點推薦與 CP 值討論。</p>
+        <a id="linkDcard" class="btn-link" target="_blank">搜尋 Dcard</a>
+      </div>
+
+      <div class="card">
+        <h3>💬 PTT 鄉民討論</h3>
+        <p>搜尋 Food / Foodie / San-Chung 等看板在地評價。</p>
+        <a id="linkPtt" class="btn-link" target="_blank">搜尋 PTT</a>
+      </div>
+    </div>
+
+    <div class="note">
+      💡 <b>提示：</b>開啟連結後，可優先在搜尋結果關鍵字後加上「好喝」、「好吃」、「雷」、「交通」或「必點」來鎖定特定評價。
+    </div>
+  </div>
+</div>
+
+<script>
+  function searchStore() {
+    const district = document.getElementById('district').value.trim();
+    const storeName = document.getElementById('storeName').value.trim();
+
+    if (!storeName) {
+      alert('請至少輸入店家名稱！');
+      return;
+    }
+
+    const keyword = `${district} ${storeName}`.trim();
+
+    // 1. Google Maps
+    const googleUrl = `https://www.google.com/maps/search/${encodeURIComponent(keyword)}`;
+
+    // 2. Threads (Direct search)
+    const threadsUrl = `https://www.threads.net/search?q=${encodeURIComponent(keyword)}`;
+
+    // 3. Dcard (Google Site Search for better precision)
+    const dcardUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword + ' site:dcard.tw')}`;
+
+    // 4. PTT (Google Site Search)
+    const pttUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword + ' site:ptt.cc')}`;
+
+    // DOM Updates
+    document.getElementById('targetTitle').innerText = `搜尋目標：${keyword}`;
+    document.getElementById('linkGoogle').href = googleUrl;
+    document.getElementById('linkThreads').href = threadsUrl;
+    document.getElementById('linkDcard').href = dcardUrl;
+    document.getElementById('linkPtt').href = pttUrl;
+
+    document.getElementById('resultsBlock').classList.add('active');
+  }
+</script>
+
+</body>
+</html>
